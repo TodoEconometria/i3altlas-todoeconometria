@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>i3 Atlas - Deep Learning vs Machine Learning | Objetos Interestelares</title>
+    <meta name="description" content="Analisis comparativo ML vs DL sobre datos astronomicos reales del catalogo JPL con Apache Spark. Los 3 visitantes interestelares del Sistema Solar.">
+    <meta property="og:title" content="i3 Atlas - Los Visitantes Interestelares">
+    <meta property="og:description" content="Deep Learning vs Machine Learning en datos astronomicos reales con Apache Spark">
+    <meta property="og:image" content="https://todoeconometria.github.io/ejercicios-bigdata/assets/todoeconometria_logo.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.7;
+        }
+
+        /* ── HEADER ── */
+        .hero {
+            background: linear-gradient(135deg, #0d1b2a 0%, #1b0a2e 40%, #0d1117 100%);
+            padding: 3rem 2rem 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 3px solid #e91e63;
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.3) 0%, transparent 100%),
+                        radial-gradient(2px 2px at 60% 10%, rgba(255,255,255,0.4) 0%, transparent 100%),
+                        radial-gradient(1px 1px at 80% 50%, rgba(255,255,255,0.2) 0%, transparent 100%),
+                        radial-gradient(2px 2px at 40% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
+                        radial-gradient(1px 1px at 10% 70%, rgba(255,255,255,0.5) 0%, transparent 100%),
+                        radial-gradient(1px 1px at 90% 20%, rgba(255,255,255,0.4) 0%, transparent 100%);
+            animation: twinkle 4s ease-in-out infinite alternate;
+        }
+        @keyframes twinkle { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+
+        .hero-content { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.2);
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0 30px rgba(233, 30, 99, 0.3);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #FFE66D, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+        .hero .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 0.5rem;
+        }
+        .hero .author {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.6);
+        }
+        .hero .author a { color: #58a6ff; text-decoration: none; }
+
+        /* ── CTA BUTTONS ── */
+        .cta-row {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        .cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .cta-primary {
+            background: linear-gradient(135deg, #e91e63, #ff5722);
+            color: white;
+            box-shadow: 0 4px 15px rgba(233,30,99,0.4);
+        }
+        .cta-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(233,30,99,0.5); }
+        .cta-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .cta-secondary:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+
+        /* ── INTERSTELLAR CARDS ── */
+        .iso-section {
+            max-width: 1100px;
+            margin: -2rem auto 0;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+        .iso-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .iso-card {
+            background: linear-gradient(135deg, #161b22, #1a1f2e);
+            border: 1px solid #30363d;
+            border-radius: 16px;
+            padding: 1.8rem;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .iso-card:hover { transform: translateY(-4px); border-color: #e91e63; }
+        .iso-card h3 { font-size: 1.3rem; margin-bottom: 0.8rem; }
+        .iso-card .year { font-size: 0.8rem; opacity: 0.5; margin-left: 0.5rem; }
+        .iso-card p { font-size: 0.9rem; margin: 0.3rem 0; }
+        .iso-card .label { color: #8b949e; }
+        .iso-card .value { color: #e6edf3; font-weight: 500; }
+
+        .card-oumuamua h3 { color: #FF6B6B; }
+        .card-borisov h3 { color: #4ECDC4; }
+        .card-atlas h3 { color: #FFE66D; }
+
+        /* ── SECTIONS ── */
+        .section {
+            max-width: 1100px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+        .section h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #e6edf3;
+        }
+        .section h2 span { color: #e91e63; }
+
+        /* ── ANIMATIONS ── */
+        .anim-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+        .anim-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .anim-card:hover { transform: translateY(-4px); }
+        .anim-card img {
+            width: 100%;
+            display: block;
+            border-bottom: 1px solid #30363d;
+        }
+        .anim-card .info {
+            padding: 1.2rem 1.5rem;
+        }
+        .anim-card h3 { font-size: 1.1rem; color: #e6edf3; margin-bottom: 0.5rem; }
+        .anim-card p { font-size: 0.85rem; color: #8b949e; }
+
+        /* ── PIPELINE ── */
+        .pipeline {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .pipe-step {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center;
+            position: relative;
+        }
+        .pipe-step::after {
+            content: "\2192";
+            position: absolute;
+            right: -1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #e91e63;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .pipe-step:last-child::after { display: none; }
+        .pipe-num {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            background: #e91e63;
+            color: white;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .pipe-step h4 { font-size: 0.85rem; color: #e6edf3; margin-bottom: 0.3rem; }
+        .pipe-step p { font-size: 0.75rem; color: #8b949e; }
+
+        /* ── TECH STACK ── */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+        .tech-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        .tech-card h4 { color: #58a6ff; margin-bottom: 0.5rem; font-size: 1rem; }
+        .tech-card ul { list-style: none; font-size: 0.85rem; }
+        .tech-card li { padding: 0.2rem 0; }
+        .tech-card li::before { content: "\2022 "; color: #e91e63; }
+
+        /* ── REFERENCES ── */
+        .refs {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 16px;
+            padding: 2rem;
+            font-size: 0.85rem;
+            line-height: 1.9;
+        }
+        .refs li { margin-bottom: 0.3rem; color: #8b949e; }
+
+        /* ── FOOTER ── */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid #30363d;
+            margin-top: 4rem;
+            background: #161b22;
+        }
+        .footer img { width: 60px; border-radius: 50%; margin-bottom: 1rem; opacity: 0.8; }
+        .footer p { font-size: 0.85rem; color: #8b949e; margin: 0.3rem 0; }
+        .footer a { color: #58a6ff; text-decoration: none; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .pipe-step::after { display: none; }
+            .pipeline { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ HERO ═══ -->
+    <div class="hero">
+        <div class="hero-content">
+            <img src="https://todoeconometria.github.io/ejercicios-bigdata/assets/todoeconometria_logo.png"
+                 alt="TodoEconometria" class="logo">
+            <h1>i3 Atlas</h1>
+            <p class="subtitle">Deep Learning vs Machine Learning sobre Datos Astronomicos Reales</p>
+            <p class="subtitle" style="font-size:1rem; opacity:0.7;">
+                Analisis comparativo con Apache Spark de los 3 objetos interestelares del Sistema Solar
+            </p>
+            <p class="author">
+                Prof. Juan Marcelo Gutierrez Miranda |
+                <a href="https://github.com/TodoEconometria">@TodoEconometria</a>
+            </p>
+            <div class="cta-row">
+                <a href="dashboard.html" class="cta cta-primary">
+                    Ver Dashboard Interactivo
+                </a>
+                <a href="https://github.com/TodoEconometria/i3altlas-todoeconometria" class="cta cta-secondary">
+                    Codigo en GitHub
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ INTERSTELLAR OBJECTS ═══ -->
+    <div class="iso-section">
+        <div class="iso-grid">
+            <div class="iso-card card-oumuamua">
+                <h3>1I/'Oumuamua <span class="year">2017</span></h3>
+                <p><span class="label">Forma:</span> <span class="value">Alargada 10:1 (~200m)</span></p>
+                <p><span class="label">Perihelio:</span> <span class="value">0.255 AU</span></p>
+                <p><span class="label">Velocidad:</span> <span class="value">26.3 km/s</span></p>
+                <p><span class="label">Origen:</span> <span class="value">Direccion de Vega</span></p>
+            </div>
+            <div class="iso-card card-borisov">
+                <h3>2I/Borisov <span class="year">2019</span></h3>
+                <p><span class="label">Forma:</span> <span class="value">Cometa con coma (~1km)</span></p>
+                <p><span class="label">Perihelio:</span> <span class="value">2.007 AU</span></p>
+                <p><span class="label">Velocidad:</span> <span class="value">32.2 km/s</span></p>
+                <p><span class="label">Origen:</span> <span class="value">Direccion de Casiopea</span></p>
+            </div>
+            <div class="iso-card card-atlas">
+                <h3>3I/ATLAS <span class="year">2025</span></h3>
+                <p><span class="label">Forma:</span> <span class="value">Cometa activo (~2km)</span></p>
+                <p><span class="label">Perihelio:</span> <span class="value">1.35 AU</span></p>
+                <p><span class="label">Velocidad:</span> <span class="value">60 km/s (220,000 km/h)</span></p>
+                <p><span class="label">Origen:</span> <span class="value">Centro galactico (Sagitario)</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ ANIMATIONS ═══ -->
+    <div class="section">
+        <h2>Trayectorias <span>Hiperbolicas</span></h2>
+        <div class="anim-grid">
+            <div class="anim-card">
+                <img src="assets/three_interstellar_cinematic.gif" alt="Los 3 Interestelares" loading="lazy">
+                <div class="info">
+                    <h3>Los 3 Visitantes</h3>
+                    <p>Comparativa de las trayectorias hiperbolicas de 'Oumuamua, Borisov y ATLAS atravesando el Sistema Solar</p>
+                </div>
+            </div>
+            <div class="anim-card">
+                <img src="assets/3i_atlas_journey_cinematic.gif" alt="Viaje de 3I/ATLAS" loading="lazy">
+                <div class="info">
+                    <h3>El Viaje de 3I/ATLAS</h3>
+                    <p>El tercer objeto interestelar confirmado, viajando a 220,000 km/h desde el centro galactico</p>
+                </div>
+            </div>
+            <div class="anim-card">
+                <img src="assets/oumuamua_shape_rotation.gif" alt="Rotacion de 'Oumuamua" loading="lazy">
+                <div class="info">
+                    <h3>'Oumuamua: Forma Unica</h3>
+                    <p>Rotacion del misterioso objeto con proporcion 10:1, el primer visitante interestelar confirmado</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ PIPELINE ═══ -->
+    <div class="section">
+        <h2>Pipeline de <span>7 Pasos</span></h2>
+        <div class="pipeline">
+            <div class="pipe-step">
+                <div class="pipe-num">1</div>
+                <h4>Adquisicion</h4>
+                <p>APIs JPL + SDSS</p>
+            </div>
+            <div class="pipe-step">
+                <div class="pipe-num">2</div>
+                <h4>ETL Spark</h4>
+                <p>Limpieza distribuida</p>
+            </div>
+            <div class="pipe-step">
+                <div class="pipe-num">3</div>
+                <h4>ML Tradicional</h4>
+                <p>RF, SVM, XGBoost</p>
+            </div>
+            <div class="pipe-step">
+                <div class="pipe-num">4</div>
+                <h4>Deep Learning</h4>
+                <p>DNN, Autoencoder, CNN</p>
+            </div>
+            <div class="pipe-step">
+                <div class="pipe-num">5</div>
+                <h4>Benchmark</h4>
+                <p>ML vs DL metricas</p>
+            </div>
+            <div class="pipe-step">
+                <div class="pipe-num">6</div>
+                <h4>Dashboard</h4>
+                <p>Plotly 8 pestanas</p>
+            </div>
+            <div class="pipe-step">
+                <div class="pipe-num">7</div>
+                <h4>Animaciones</h4>
+                <p>GIFs cinematicos</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TECH STACK ═══ -->
+    <div class="section">
+        <h2>Stack <span>Tecnologico</span></h2>
+        <div class="tech-grid">
+            <div class="tech-card">
+                <h4>Big Data</h4>
+                <ul>
+                    <li>Apache Spark 3.5 (cluster Docker)</li>
+                    <li>PyArrow + Parquet</li>
+                    <li>50,000+ objetos astronomicos</li>
+                </ul>
+            </div>
+            <div class="tech-card">
+                <h4>Machine Learning</h4>
+                <ul>
+                    <li>Random Forest, SVM, XGBoost</li>
+                    <li>PCA + K-Means</li>
+                    <li>Isolation Forest (anomalias)</li>
+                </ul>
+            </div>
+            <div class="tech-card">
+                <h4>Deep Learning</h4>
+                <ul>
+                    <li>DNN Clasificador (Keras)</li>
+                    <li>Autoencoder (anomalias)</li>
+                    <li>1D-CNN (espectral SDSS)</li>
+                </ul>
+            </div>
+            <div class="tech-card">
+                <h4>Datos Reales</h4>
+                <ul>
+                    <li>JPL Small-Body Database (NASA)</li>
+                    <li>JPL Horizons (efemerides)</li>
+                    <li>SDSS Galaxy Colors (50K galaxias)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ REFERENCES ═══ -->
+    <div class="section">
+        <h2>Referencias <span>Academicas</span></h2>
+        <div class="refs">
+            <ol>
+                <li>Tonry, J. L., et al. (2018). ATLAS: A High-cadence All-sky Survey System. <em>PASP</em>, 130(988), 064505.</li>
+                <li>Meech, K. J., et al. (2017). A brief visit from a red and extremely elongated interstellar asteroid. <em>Nature</em>, 552, 378-381.</li>
+                <li>Jewitt, D., et al. (2019). Initial characterization of interstellar comet 2I/Borisov. <em>ApJ</em>, 886, L29.</li>
+                <li>Goodfellow, I., Bengio, Y., & Courville, A. (2016). <em>Deep Learning</em>. MIT Press.</li>
+                <li>Pedregosa, F., et al. (2011). Scikit-learn: Machine Learning in Python. <em>JMLR</em>, 12, 2825-2830.</li>
+                <li>Chen, T., & Guestrin, C. (2016). XGBoost: A Scalable Tree Boosting System. <em>KDD '16</em>, 785-794.</li>
+                <li>Zaharia, M., et al. (2016). Apache Spark: A Unified Engine for Big Data Processing. <em>CACM</em>, 59(11), 56-65.</li>
+                <li>LeCun, Y., Bengio, Y., & Hinton, G. (2015). Deep learning. <em>Nature</em>, 521(7553), 436-444.</li>
+                <li>Liu, F. T., Ting, K. M., & Zhou, Z. H. (2008). Isolation Forest. <em>IEEE ICDM</em>, 413-422.</li>
+                <li>Murray, C. D., & Dermott, S. F. (1999). <em>Solar System Dynamics</em>. Cambridge University Press.</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <div class="footer">
+        <img src="https://todoeconometria.github.io/ejercicios-bigdata/assets/todoeconometria_logo.png"
+             alt="TodoEconometria">
+        <p><strong>i3 Atlas</strong> - Big Data con Python</p>
+        <p>Prof. Juan Marcelo Gutierrez Miranda | <a href="https://github.com/TodoEconometria">@TodoEconometria</a></p>
+        <p style="margin-top: 1rem;">
+            <a href="dashboard.html">Dashboard</a> &middot;
+            <a href="https://github.com/TodoEconometria/i3altlas-todoeconometria">GitHub</a> &middot;
+            <a href="https://todoeconometria.com">todoeconometria.com</a>
+        </p>
+        <p style="margin-top: 1.5rem; font-size: 0.75rem; color: #484f58;">
+            Datos: JPL Small-Body Database (NASA) + SDSS | Visualizaciones: Plotly + Matplotlib
+        </p>
+    </div>
+
+</body>
+</html>
