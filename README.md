@@ -1,13 +1,52 @@
-# i3 Atlas: Deep Learning vs Machine Learning
+<p align="center">
+  <img src="https://todoeconometria.github.io/ejercicios-bigdata/assets/todoeconometria_logo.png" alt="TodoEconometria" width="150">
+</p>
 
-## Analisis Comparativo sobre Datos Astronomicos Reales con Apache Spark
+<h1 align="center">i3 Atlas</h1>
+<h3 align="center">Deep Learning vs Machine Learning sobre Datos Astronomicos Reales</h3>
+<p align="center">
+  Analisis comparativo con Apache Spark de los 3 objetos interestelares del Sistema Solar
+</p>
 
-Ejercicio avanzado sin entrega - Comparativa directa entre enfoques de Deep Learning
-y Machine Learning tradicional para el analisis del catalogo astronomico i3 Atlas,
-utilizando un entorno distribuido Spark para procesamiento Big Data y visualizaciones
-interactivas.
+<p align="center">
+  <a href="https://todoeconometria.github.io/i3altlas-todoeconometria/"><strong>Ver Web del Proyecto</strong></a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://todoeconometria.github.io/i3altlas-todoeconometria/dashboard.html"><strong>Dashboard Interactivo</strong></a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://todoeconometria.com">todoeconometria.com</a>
+</p>
 
-## Tabla Comparativa
+<p align="center">
+  <img src="docs/assets/three_interstellar_cinematic.gif" alt="Los 3 Interestelares" width="700">
+</p>
+
+---
+
+## Los 3 Visitantes Interestelares
+
+| Objeto | Descubierto | Perihelio | Velocidad | Origen |
+|--------|-------------|-----------|-----------|--------|
+| **1I/'Oumuamua** | Oct 2017 | 0.255 AU | 26.3 km/s | Direccion de Vega |
+| **2I/Borisov** | Ago 2019 | 2.007 AU | 32.2 km/s | Casiopea |
+| **3I/ATLAS** | Jul 2025 | 1.35 AU | 60 km/s (220,000 km/h) | Centro galactico |
+
+Son los unicos objetos confirmados que provienen de fuera del Sistema Solar. Sus trayectorias hiperbolicas (excentricidad > 1) los distinguen de cualquier otro cuerpo conocido.
+
+## Que hace este proyecto
+
+Pipeline completo de 7 pasos que compara **Machine Learning clasico** vs **Deep Learning** sobre datos astronomicos reales:
+
+```
+1. Adquisicion    -> APIs JPL (NASA) + SDSS (50,000+ objetos)
+2. ETL Spark      -> Limpieza distribuida + Feature Engineering
+3. ML Tradicional -> Random Forest, SVM, XGBoost, Isolation Forest
+4. Deep Learning  -> DNN, Autoencoder, 1D-CNN (TensorFlow/Keras)
+5. Benchmark      -> Metricas comparativas: precision vs tiempo
+6. Dashboard      -> 8 pestanas Plotly interactivas
+7. Animaciones    -> GIFs cinematicos de trayectorias hiperbolicas
+```
+
+## Comparativa ML vs DL
 
 | Aspecto | Deep Learning | ML Tradicional |
 |---------|---------------|----------------|
@@ -18,111 +57,58 @@ interactivas.
 | **Escalabilidad** | Escala con datos y compute | Limitada por algoritmo |
 | **Caso ideal** | Deteccion de anomalias complejas | Clasificacion con features claras |
 
-## Arquitectura
+## Animaciones
 
-```
-
-├── config.py                    # Configuracion central (Spark, GPU, parametros)
-├── main.py                      # Orquestador: ejecuta todo el pipeline
-├── data_acquisition.py          # Descarga datos reales (JPL, SDSS)
-├── spark_etl.py                 # ETL distribuido con Apache Spark
-├── ml_traditional.py            # ML: Random Forest, SVM, XGBoost, Isolation Forest
-├── deep_learning_pipeline.py    # DL: DNN, Autoencoder, 1D-CNN (TensorFlow/Keras)
-├── benchmark_comparison.py      # Metricas comparativas ML vs DL
-├── export_dashboard_html.py     # Dashboard Plotly HTML (8 pestanas)
-├── requirements_i3atlas.txt     # Dependencias
-├── README.md                    # Este archivo
-└── output/
-    ├── datos/                   # Cache de datos descargados
-    ├── figuras/                 # Graficos generados
-    ├── i3atlas_procesado.parquet
-    ├── ml_results.json
-    ├── dl_results.json
-    ├── benchmark_results.json
-    └── dashboard_i3atlas_ml_vs_dl.html
-```
+<table>
+<tr>
+<td><img src="docs/assets/3i_atlas_journey_cinematic.gif" alt="Viaje de 3I/ATLAS" width="350"></td>
+<td><img src="docs/assets/oumuamua_shape_rotation.gif" alt="Rotacion de Oumuamua" width="350"></td>
+</tr>
+<tr>
+<td align="center"><b>Viaje de 3I/ATLAS</b><br><sub>220,000 km/h desde el centro galactico</sub></td>
+<td align="center"><b>'Oumuamua: Forma 10:1</b><br><sub>Primer visitante interestelar</sub></td>
+</tr>
+</table>
 
 ## Fuentes de Datos Reales
 
 | Fuente | Datos | API |
 |--------|-------|-----|
-| **JPL Small-Body Database** | 50,000+ asteroides/cometas: elementos orbitales + propiedades fisicas | `ssd-api.jpl.nasa.gov` |
-| **JPL Horizons** | Efemerides de 'Oumuamua y Borisov (trayectoria post-perihelio) | `astroquery.jplhorizons` |
-| **SDSS Galaxy Colors** | 50,000 galaxias: colores u-g, g-r, r-i, i-z + redshift | `astroML.datasets` |
-
-## Pipeline (6 pasos)
-
-```
-PASO 1/6: Adquisicion de Datos      -> APIs JPL + SDSS
-PASO 2/6: ETL con Spark             -> Limpieza + Feature Engineering
-PASO 3/6: ML Tradicional            -> RF, SVM, XGBoost, Isolation Forest
-PASO 4/6: Deep Learning             -> DNN, Autoencoder, 1D-CNN (GPU)
-PASO 5/6: Benchmark Comparativo     -> Metricas, graficos, recomendaciones
-PASO 6/6: Dashboard HTML            -> 8 pestanas Plotly interactivas
-```
-
-## Ejecucion
-
-### Prerequisitos
-
-1. Cluster Spark activo:
-   ```bash
-   cd docker
-   docker compose -f docker-compose-spark.yml up -d
-   ```
-
-2. Instalar dependencias:
-   ```bash
-   pip install -r requirements_i3atlas.txt
-   ```
-
-3. (Opcional) Para GPU - en WSL2:
-   ```bash
-   source ~/tf-gpu-env/bin/activate
-   ```
-
-### Ejecutar pipeline completo
-
-```bash
-python main.py
-```
-
-### Ejecutar modulos individuales
-
-```bash
-python data_acquisition.py     # Solo descargar datos
-python spark_etl.py            # Solo ETL
-python ml_traditional.py       # Solo ML
-python deep_learning_pipeline.py  # Solo DL
-python benchmark_comparison.py # Solo benchmark
-python export_dashboard_html.py   # Solo dashboard
-```
+| **JPL Small-Body Database** | 50,000+ asteroides/cometas | `ssd-api.jpl.nasa.gov` |
+| **JPL Horizons** | Efemerides de 'Oumuamua y Borisov | `astroquery.jplhorizons` |
+| **SDSS Galaxy Colors** | 50,000 galaxias: colores u-g, g-r, r-i, i-z | `astroML.datasets` |
 
 ## Dashboard (8 pestanas)
 
 | Pestana | Contenido |
 |---------|-----------|
-| **Exploracion 3D** | Scatter 3D de orbitas (e vs a vs i), objetos interestelares destacados |
+| **Interestelares** | Los 3 visitantes: trayectorias 3D, velocidades, perihelios |
+| **Exploracion 3D** | Scatter 3D de orbitas con filtros por tipo |
+| **Animaciones** | GIFs cinematicos embebidos |
 | **ML: Clasificacion** | Metricas RF, SVM, XGBoost + feature importance |
-| **DL: Clasificacion** | Loss curves DNN + comparativa directa con ML |
-| **Anomalias ML** | PCA 3D + Isolation Forest, interestelares marcados |
-| **Anomalias DL** | Autoencoder reconstruction error, deteccion de anomalias |
-| **Espectral** | RF vs 1D-CNN en clasificacion espectral SDSS |
-| **Benchmark** | Graficos comparativos globales: precision vs tiempo |
-| **i3 Atlas** | Trayectorias post-perihelio de objetos interestelares |
+| **DL: Clasificacion** | Loss curves DNN + comparativa directa |
+| **Anomalias ML** | PCA 3D + Isolation Forest |
+| **Anomalias DL** | Autoencoder reconstruction error |
+| **Benchmark** | Precision vs tiempo: ML vs DL |
 
-## Entorno Tecnico
+## Ejecucion
 
-| Componente | Version |
-|------------|---------|
-| Apache Spark | 3.5.4 (cluster Docker: master + 2 workers) |
-| TensorFlow | 2.20.0 (CUDA 12.x bundled) |
-| GPU | NVIDIA RTX 4060 (8 GB VRAM) |
-| scikit-learn | 1.2+ |
-| XGBoost | 1.7+ |
-| Python | 3.9+ |
-| RAM | 64 GB |
-| CPU | Intel i9 |
+```bash
+# 1. Instalar dependencias
+pip install -r requirements.txt
+
+# 2. (Opcional) Cluster Spark
+docker compose -f docker-compose-spark.yml up -d
+
+# 3. Ejecutar pipeline completo
+python main.py
+
+# O modulos individuales
+python data_acquisition.py        # Solo datos
+python ml_traditional.py          # Solo ML
+python deep_learning_pipeline.py  # Solo DL (requiere TensorFlow)
+python export_dashboard_html.py   # Solo dashboard
+```
 
 ## Feature Engineering Astronomico
 
@@ -133,20 +119,57 @@ python export_dashboard_html.py   # Solo dashboard
 | `energy_param` | -1/(2a) | Energia orbital especifica |
 | `q_over_a` | q/a | Ratio perihelio/semieje (circularidad) |
 
+## Stack Tecnologico
+
+| Componente | Version |
+|------------|---------|
+| Apache Spark | 3.5.4 (cluster Docker) |
+| TensorFlow | 2.12+ (GPU opcional) |
+| scikit-learn | 1.2+ |
+| XGBoost | 1.7+ |
+| Plotly | 5.14+ |
+| Python | 3.9+ |
+
+## Arquitectura
+
+```
+i3atlas-todoeconometria/
+├── config.py                    # Configuracion central
+├── main.py                      # Orquestador del pipeline
+├── data_acquisition.py          # Descarga datos reales (JPL, SDSS)
+├── spark_etl.py                 # ETL distribuido con Apache Spark
+├── ml_traditional.py            # ML: RF, SVM, XGBoost, Isolation Forest
+├── deep_learning_pipeline.py    # DL: DNN, Autoencoder, 1D-CNN
+├── benchmark_comparison.py      # Metricas comparativas ML vs DL
+├── export_dashboard_html.py     # Dashboard Plotly (8 pestanas)
+├── animation_trajectories.py    # Animaciones de trayectorias
+├── animation_cinematic.py       # Animaciones cinematograficas
+├── requirements.txt             # Dependencias
+├── docs/                        # Web del proyecto (GitHub Pages)
+│   ├── index.html               # Landing page
+│   ├── dashboard.html           # Dashboard interactivo
+│   └── assets/                  # GIFs y recursos
+└── output/                      # Resultados (auto-generado)
+```
+
 ---
 
-**Curso:** Big Data con Python - De Cero a Produccion
-**Profesor:** Juan Marcelo Gutierrez Miranda | @TodoEconometria
-**Metodologia:** Ejercicios progresivos con datos reales y herramientas profesionales
+<p align="center">
+  <img src="https://todoeconometria.github.io/ejercicios-bigdata/assets/todoeconometria_logo.png" alt="TodoEconometria" width="60">
+</p>
+<p align="center">
+  <b>Big Data con Python - De Cero a Produccion</b><br>
+  Prof. Juan Marcelo Gutierrez Miranda | <a href="https://github.com/TodoEconometria">@TodoEconometria</a><br>
+  <a href="https://todoeconometria.com">todoeconometria.com</a>
+</p>
 
 **Referencias academicas:**
-- Tonry, J. L., et al. (2018). ATLAS: A High-cadence All-sky Survey System. Publications of the Astronomical Society of the Pacific, 130(988), 064505.
-- Goodfellow, I., Bengio, Y., & Courville, A. (2016). Deep Learning. MIT Press.
-- LeCun, Y., Bengio, Y., & Hinton, G. (2015). Deep learning. Nature, 521(7553), 436-444.
-- Pedregosa, F., et al. (2011). Scikit-learn: Machine Learning in Python. Journal of Machine Learning Research, 12, 2825-2830.
-- Zaharia, M., Xin, R. S., Wendell, P., et al. (2016). Apache Spark: A Unified Engine for Big Data Processing. Communications of the ACM, 59(11), 56-65.
-- Chen, T., & Guestrin, C. (2016). XGBoost: A Scalable Tree Boosting System. Proceedings of KDD '16, 785-794.
-- Breiman, L. (2001). Random Forests. Machine Learning, 45(1), 5-32.
-- Liu, F. T., Ting, K. M., & Zhou, Z. H. (2008). Isolation Forest. IEEE International Conference on Data Mining, 413-422.
-- Kingma, D. P., & Welling, M. (2014). Auto-Encoding Variational Bayes. ICLR 2014.
-- Murray, C. D., & Dermott, S. F. (1999). Solar System Dynamics. Cambridge University Press.
+- Tonry, J. L., et al. (2018). ATLAS: A High-cadence All-sky Survey System. *PASP*, 130(988), 064505.
+- Meech, K. J., et al. (2017). A brief visit from a red and extremely elongated interstellar asteroid. *Nature*, 552, 378-381.
+- Goodfellow, I., Bengio, Y., & Courville, A. (2016). *Deep Learning*. MIT Press.
+- Pedregosa, F., et al. (2011). Scikit-learn: Machine Learning in Python. *JMLR*, 12, 2825-2830.
+- Zaharia, M., et al. (2016). Apache Spark: A Unified Engine for Big Data Processing. *CACM*, 59(11), 56-65.
+- Chen, T., & Guestrin, C. (2016). XGBoost: A Scalable Tree Boosting System. *KDD '16*, 785-794.
+- Liu, F. T., et al. (2008). Isolation Forest. *IEEE ICDM*, 413-422.
+- LeCun, Y., et al. (2015). Deep learning. *Nature*, 521(7553), 436-444.
+- Murray, C. D., & Dermott, S. F. (1999). *Solar System Dynamics*. Cambridge University Press.
